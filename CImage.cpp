@@ -137,13 +137,48 @@ void CImage::FloydSteinberg(SInput config) {
 }
 
 void CImage::JJN(SInput config) {
-    for (int j = 0; j < height - 1; j++) {
-        for (int i = 0; i < width - 1; i++) {
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
             double oldPixel = pix[index(i, j)];
             double newPixel = findNearestPalleteCollor((int) oldPixel);
             double error = oldPixel - newPixel;
             pix[index(i, j)] = newPixel;
-
+            if (i + 1 < width) {
+                pix[index(i + 1, j)] += error * (7.0 / 48.0);
+            }
+            if (i + 2 < width) {
+                pix[index(i + 2, j)] += error * (5.0 / 48.0);
+            }
+            if (j + 1 < height) {
+                if (i - 2 >= 0) {
+                    pix[index(i - 2, j + 1)] += error * (3.0 / 48.0);
+                }
+                if (i - 1 >= 0) {
+                    pix[index(i - 1, j + 1)] += error * (5.0 / 48.0);
+                }
+                pix[index(i, j + 1)] += error * (7.0 / 48.0);
+                if (i + 1 < width) {
+                    pix[index(i + 1, j + 1)] += error * (5.0 / 48.0);
+                }
+                if (i + 2 < width) {
+                    pix[index(i + 2, j + 1)] += error * (3.0 / 48.0);
+                }
+            }
+            if (j + 2 < height) {
+                if (i - 2 >= 0) {
+                    pix[index(i - 2, j + 2)] += error * (1.0 / 48.0);
+                }
+                if (i - 1 >= 0) {
+                    pix[index(i - 1, j + 2)] += error * (3.0 / 48.0);
+                }
+                pix[index(i, j + 2)] += error * (5.0 / 48.0);
+                if (i + 1 < width) {
+                    pix[index(i + 1, j + 2)] += error * (3.0 / 48.0);
+                }
+                if (i + 2 < width) {
+                    pix[index(i + 2, j + 2)] += error * (1.0 / 48.0);
+                }
+            }
         }
     }
 }
