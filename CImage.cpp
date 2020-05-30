@@ -114,15 +114,15 @@ void CImage::Random(SInput config) {
 }
 
 void CImage::FloydSteinberg(SInput config) {
-    for (int i = 0; i < width - 1; i++) {
-        for (int j = 0; j < height - 1; j++) {
+    for (int j = 0; j < height - 1; j++) {
+        for (int i = 0; i < width - 1; i++) {
             double oldPixel = pix[index(i, j)];
             double newPixel = findNearestPalleteCollor((int) oldPixel);
             double error = oldPixel - newPixel;
             pix[index(i, j)] = newPixel;
             pix[index(i + 1, j)] += error * (7.0 / 16.0);
             if (i - 1 >= 0) {
-                pix[index(i - 1, j)] += error * (3.0 / 16.0);
+                pix[index(i - 1, j + 1)] += error * (3.0 / 16.0);
             }
             pix[index(i, j + 1)] += error * (5.0 / 16.0);
             pix[index(i + 1, j + 1)] += error * (1.0 / 16.0);
