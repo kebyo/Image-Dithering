@@ -184,64 +184,40 @@ void CImage::JJN(SInput config) {
 }
 
 void CImage::Sierra(SInput config) {
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-            double oldPixel = reverseGamma(pix[index(i, j)], config.gamma);
-            double newPixel = newPix(oldPixel, config.bit);
-            pix[index(i, j)] = Gamma(newPixel, config.gamma);
-            double quant_error = oldPixel - newPixel;
-            for (int ni = 1; ni < 3; ni++) {
-                if (i + ni < width) {
-                    if (ni == 1) {
-                        pix[index(i + ni, j)] = round(
-                                Gamma(pix[index(i + ni, j)] + quant_error * (double) 5.0 / 32.0, config.gamma));
-                    }
-                    if (ni == 2) {
-                        pix[index(i + ni, j)] = round(
-                                Gamma(pix[index(i + ni, j)] + quant_error * (double) 3.0 / 32.0, config.gamma));
-                    }
-                }
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            double oldPixel = pix[index(i, j)];
+            double newPixel = findNearestPalleteCollor((int) oldPixel);
+            double error = oldPixel - newPixel;
+            pix[index(i, j)] = newPixel;
+            if (i + 1 < width) {
+                pix[index(i + 1, j)] += error * (5.0 / 32.0);
+            }
+            if (i + 2 < width) {
+                pix[index(i + 2, j)] += error * (3.0 / 32.0);
             }
             if (j + 1 < height) {
-                for (int ni = 0; ni < 3; ni++) {
-                    if (i + ni < width) {
-                        if (ni == 0) {
-                            pix[index(i + ni, j + 1)] = round(
-                                    Gamma(pix[index(i + ni, j + 1)] + quant_error * (double) 5.0 / 32.0, config.gamma));
-                        }
-                        if (ni == 1) {
-                            pix[index(i + ni, j + 1)] = round(
-                                    Gamma(pix[index(i + ni, j + 1)] + quant_error * (double) 4.0 / 32.0, config.gamma));
-                        }
-                        if (ni == 2) {
-                            pix[index(i + ni, j + 1)] = round(
-                                    Gamma(pix[index(i + ni, j + 1)] + quant_error * (double) 2.0 / 32.0, config.gamma));
-                        }
-                    }
+                if (i - 2 >= 0) {
+                    pix[index(i - 2, j + 1)] += error * (2.0 / 32.0);
                 }
-                for (int ni = -2; ni < 0; ni++) {
-                    if (i + ni >= 0) {
-                        if (ni == -2) {
-                            pix[index(i + ni, j + 1)] = round(
-                                    Gamma(pix[index(i + ni, j + 1)] + quant_error * (double) 2.0 / 32.0, config.gamma));
-                        }
-                        if (ni == -1) {
-                            pix[index(i + ni, j + 1)] = round(
-                                    Gamma(pix[index(i + ni, j + 1)] + quant_error * (double) 4.0 / 32.0, config.gamma));
-                        }
-                    }
+                if (i - 1 >= 0) {
+                    pix[index(i - 1, j + 1)] += error * (4.0 / 32.0);
+                }
+                pix[index(i, j + 1)] += error * (5.0 / 32.0);
+                if (i + 1 < width) {
+                    pix[index(i + 1, j + 1)] += error * (4.0 / 32.0);
+                }
+                if (i + 2 < width) {
+                    pix[index(i + 2, j + 1)] += error * (2.0 / 32.0);
                 }
             }
             if (j + 2 < height) {
-                pix[index(i, j + 2)] = round(
-                        Gamma(pix[index(i, j + 2)] + quant_error * (double) 3.0 / 32.0, config.gamma));
                 if (i - 1 >= 0) {
-                    pix[index(i - 1, j + 2)] = round(
-                            Gamma(pix[index(i - 1, j + 2)] + quant_error * (double) 2.0 / 32.0, config.gamma));
+                    pix[index(i - 1, j + 2)] += error * (2.0 / 32.0);
                 }
+                pix[index(i, j + 2)] += error * (3.0 / 32.0);
                 if (i + 1 < width) {
-                    pix[index(i + 1, j + 2)] = round(
-                            Gamma(pix[index(i + 1, j + 2)] + quant_error * (double) 2.0 / 32.0, config.gamma));
+                    pix[index(i + 1, j + 2)] += error * (2.0 / 32.0);
                 }
             }
         }
