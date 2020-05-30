@@ -256,12 +256,12 @@ void CImage::Atkinson(SInput config) {
 void CImage::Halftone4x4orthogonal(SInput config) {
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            double clr = reverseGamma(pix[j * width + i], config.gamma);
-            clr = clr + 255.0 / config.bit * (Halftone[i % 8][j % 8] / 16 - 0.5);
-            clr = newPix((int) clr, config.bit);
-            pix[j * width + i] = round(Gamma(clr, config.gamma));
+            int clr = (int) pix[j * width + i];
+            clr = clr + 255.0 * (Halftone[i % 4][j % 4] - 0.5);
+            pix[j * width + i] = findNearestPalleteCollor(clr);
         }
     }
+
 }
 
 int CImage::newPix(int n, int bit) {
