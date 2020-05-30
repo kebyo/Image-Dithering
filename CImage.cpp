@@ -114,77 +114,36 @@ void CImage::Random(SInput config) {
 }
 
 void CImage::FloydSteinberg(SInput config) {
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            double oldPixel = pix[index(i, j)];
+            double newPixel = findNearestPalleteCollor((int) oldPixel);
+            double error = oldPixel - newPixel;
+            pix[index(i, j)] = newPixel;
+            if (i + 1 < width) {
+                pix[index(i + 1, j)] += error * (7.0 / 16.0);
+            }
+            if (i - 1 >= 0 && j + 1 < height) {
+                pix[index(i - 1, j + 1)] += error * (3.0 / 16.0);
+            }
+            if (j + 1 < height) {
+                pix[index(i, j + 1)] += error * (5.0 / 16.0);
+            }
+            if (i + 1 < width && j + 1 < height) {
+                pix[index(i + 1, j + 1)] += error * (1.0 / 16.0);
+            }
+        }
+    }
+}
+
+void CImage::JJN(SInput config) {
     for (int j = 0; j < height - 1; j++) {
         for (int i = 0; i < width - 1; i++) {
             double oldPixel = pix[index(i, j)];
             double newPixel = findNearestPalleteCollor((int) oldPixel);
             double error = oldPixel - newPixel;
             pix[index(i, j)] = newPixel;
-            pix[index(i + 1, j)] += error * (7.0 / 16.0);
-            if (i - 1 >= 0) {
-                pix[index(i - 1, j + 1)] += error * (3.0 / 16.0);
-            }
-            pix[index(i, j + 1)] += error * (5.0 / 16.0);
-            pix[index(i + 1, j + 1)] += error * (1.0 / 16.0);
-        }
-    }
-}
 
-void CImage::JJN(SInput config) {
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-            double oldPixel = reverseGamma(pix[index(i, j)], config.gamma);
-            double newPixel = newPix(oldPixel, config.bit);
-            pix[index(i, j)] = Gamma(newPixel, config.gamma);
-            double quant_error = oldPixel - newPixel;
-            if (i + 1 < width) {
-                pix[index(i + 1, j)] = round(
-                        Gamma(pix[index(i + 1, j)] + quant_error * (double) 7.0 / 48.0, config.gamma));
-            }
-            if (i + 2 < width) {
-                pix[index(i + 2, j)] = round(
-                        Gamma(pix[index(i + 2, j)] + quant_error * (double) 5.0 / 48.0, config.gamma));
-            }
-            if (j + 1 < height) {
-                if (i - 2 >= 0) {
-                    pix[index(i - 2, j + 1)] = round(
-                            Gamma(pix[index(i - 2, j + 1)] + quant_error * (double) 3.0 / 48.0, config.gamma));
-                }
-                if (i - 1 >= 0) {
-                    pix[index(i - 1, j + 1)] = round(
-                            Gamma(pix[index(i - 1, j + 1)] + quant_error * (double) 5.0 / 48.0, config.gamma));
-                }
-                pix[index(i, j + 1)] = round(
-                        Gamma(pix[index(i, j + 1)] + quant_error * (double) 7.0 / 48.0, config.gamma));
-                if (i + 1 >= 0) {
-                    pix[index(i + 1, j + 1)] = round(
-                            Gamma(pix[index(i + 1, j + 1)] + quant_error * (double) 5.0 / 48.0, config.gamma));
-                }
-                if (i + 2 >= 0) {
-                    pix[index(i + 2, j + 1)] = round(
-                            Gamma(pix[index(i + 2, j + 1)] + quant_error * (double) 3.0 / 48.0, config.gamma));
-                }
-            }
-            if (j + 2 < height) {
-                if (i - 2 >= 0) {
-                    pix[index(i - 2, j + 2)] = round(
-                            Gamma(pix[index(i - 2, j + 2)] + quant_error * (double) 1.0 / 48.0, config.gamma));
-                }
-                if (i - 1 >= 0) {
-                    pix[index(i - 1, j + 2)] = round(
-                            Gamma(pix[index(i - 1, j + 2)] + quant_error * (double) 3.0 / 48.0, config.gamma));
-                }
-                pix[index(i, j + 2)] = round(
-                        Gamma(pix[index(i, j + 2)] + quant_error * (double) 5.0 / 48.0, config.gamma));
-                if (i + 1 >= 0) {
-                    pix[index(i + 1, j + 2)] = round(
-                            Gamma(pix[index(i + 1, j + 2)] + quant_error * (double) 3.0 / 48.0, config.gamma));
-                }
-                if (i + 2 >= 0) {
-                    pix[index(i + 2, j + 2)] = round(
-                            Gamma(pix[index(i + 2, j + 2)] + quant_error * (double) 1.0 / 48.0, config.gamma));
-                }
-            }
         }
     }
 }
