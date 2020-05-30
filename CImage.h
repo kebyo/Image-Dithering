@@ -19,7 +19,7 @@ struct SInput {
 
 class CImage {
 public:
-    CImage(FILE *f);
+    CImage(FILE *f, SInput config);
 
     void ditherIt(SInput config);
 
@@ -27,13 +27,14 @@ public:
 
 
 private:
+    int pallete[256];
     FILE *file;
     int version;
     int width;
     int height;
     int max_val;
     int size;
-    unsigned char *pix;
+    double *pix;
 
     double Gamma(double value, double gamma);
 
@@ -60,6 +61,8 @@ private:
     int newPix(int n, int bit);
 
     int index(int x, int y);
+
+    int findNearestPalleteCollor(int value);
 
 };
 

@@ -1,17 +1,24 @@
-//
-// Created by ssiie on 17.05.2020.
-//
-
 #include "CImage.h"
 
-CImage::CImage(FILE *f) {
+CImage::CImage(FILE *f, SInput config) {
     file = f;
     if (fscanf(f, "P%i%i%i%i\n", &this->version, &this->width, &this->height, &max_val) != 4) {
         throw CExpension("Wrong amount data in file", f);
     }
     size = width * height;
-    pix = new unsigned char[size];
-    fread(pix, sizeof(unsigned char), size, f);
+    unsigned char *buffer = new unsigned char[size];
+    pix = new double[size];
+    fread(buffer, sizeof(unsigned char), size, f);
+    for (int i = 0; i < size; i++) {
+        pix[i] = (double) buffer[i];
+    }
+    for (int i = 0; i < size; i++) {
+        pix[i] = Gamma(pix[i], config.gamma);
+    }
+    for (int i = 0; i < 256; i++) {
+        pallete[i] = newPix(i, config.bit);
+    }
+    delete[] buffer;
     fclose(f);
 }
 
@@ -82,20 +89,16 @@ double CImage::reverseGamma(double value, double gamma) {
 
 void CImage::WithoutDith(SInput config) {
     for (int i = 0; i < size; i++) {
-        int clr = pix[i];
-        clr = reverseGamma(clr, config.gamma);
-        clr = newPix((int) clr, config.bit);
-        pix[i] = Gamma(clr, config.gamma);
+        pix[i] = newPix((int) pix[i], config.bit);
     }
 }
 
 void CImage::Ordered8x8(SInput config) {
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            double clr = reverseGamma(pix[j * width + i], config.gamma);
-            clr = clr + 255.0 / config.bit * (Bayer[i % 8][j % 8] - 0.5);
-            clr = newPix((int) clr, config.bit);
-            pix[j * width + i] = round(Gamma(clr, config.gamma));
+            int clr = (int) pix[j * width + i];
+            clr = clr + 255.0 * (Bayer[i % 8][j % 8] - 0.5);
+            pix[j * width + i] = findNearestPalleteCollor(clr);
         }
     }
 }
@@ -103,38 +106,20 @@ void CImage::Ordered8x8(SInput config) {
 void CImage::Random(SInput config) {
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            double clr = reverseGamma(pix[j * width + i], config.gamma);
-            clr = clr + 255.0 / config.bit * ((double) rand() / RAND_MAX - 0.5);
-            clr = newPix((int) clr, config.bit);
-            pix[j * width + i] = round(Gamma(clr, config.gamma));
+            int clr = pix[index(i, j)];
+            clr = clr + 255.0 * ((double) rand() / RAND_MAX - 0.5);
+            pix[j * width + i] = findNearestPalleteCollor(clr);
         }
     }
 }
 
-void CImage::FloydSteinberg(SInput config) {
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-            double oldPixel = reverseGamma(pix[index(i, j)], config.gamma);
-            double newPixel = newPix(oldPixel, config.bit);
-            pix[index(i, j)] = Gamma(newPixel, config.gamma);
-            double quant_error = oldPixel - newPixel;
-            if (i + 1 < width) {
-                pix[index(i + 1, j)] = round(Gamma(pix[index(i + 1, j)] + quant_error * 7.0 / 16.0, config.gamma));
-            }
-            if (i - 1 >= 0 && j + 1 < height) {
-                pix[index(i - 1, j + 1)] = round(
-                        Gamma(pix[index(i - 1, j + 1)] + quant_error * 3.0 / 16.0, config.gamma));
-            }
-            if (j + 1 < height) {
-                pix[index(i, j + 1)] = round(Gamma(pix[index(i, j + 1)] + quant_error * 5.0 / 16.0, config.gamma));
-            }
-            if (i + 1 < width && j + 1 < height) {
-                pix[index(i + 1, j + 1)] = round(
-                        Gamma(pix[index(i + 1, j + 1)] + quant_error * 1.0 / 16.0, config.gamma));
-            }
-        }
-    }
-}
+//void CImage::FloydSteinberg(SInput config) {
+//    for (int i = 0; i < width; i++) {
+//        for (int j = 0; j < height; j++) {
+//            int
+//        }
+//    }
+//}
 
 void CImage::JJN(SInput config) {
     for (int i = 0; i < width; i++) {
@@ -357,6 +342,18 @@ int CImage::newPix(int n, int bit) {
             return result | tmp;
     }
     return 0;
+}
+
+int CImage::findNearestPalleteCollor(int value) {
+    int min = 256;
+    int result;
+    for (int i = 0; i < 256; i++) {
+        if (min > abs(value - pallete[i])) {
+            min = abs(value - pallete[i]);
+            result = pallete[i];
+        }
+    }
+    return result;
 }
 
 int CImage::index(int x, int y) {

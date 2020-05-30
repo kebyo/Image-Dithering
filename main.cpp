@@ -3,19 +3,28 @@
 #include <string.h>
 #include "CImage.h"
 
+SInput input;
+
 void getAnsw(const char *fileName, CImage &output) {
     FILE *new_f = fopen(fileName, "wb");
     if (!new_f) {
         throw CExpension("Output file didn't open", new_f);
     }
     fprintf(new_f, "P%i\n%i %i\n%i\n", 5, output.width, output.height, output.max_val);
-    fwrite(output.pix, sizeof(unsigned char), output.size, new_f);
+    unsigned char *buffer = new unsigned char[output.size];
+    for (int i = 0; i < output.size; i++) {
+        output.pix[i] = output.reverseGamma(output.pix[i], input.gamma);
+    }
+    for (int i = 0; i < output.size; i++) {
+        buffer[i] = (unsigned char) output.pix[i];
+    }
+    fwrite(buffer, sizeof(unsigned char), output.size, new_f);
+    delete[] buffer;
     fclose(new_f);
 }
 
 int main(int argc, char *argv[]) {
     try {
-        SInput input;
         FILE *f;
         if (argc != 7) {
             throw CExpension("Wrong amount of arguments");
@@ -50,7 +59,7 @@ int main(int argc, char *argv[]) {
                     break;
             }
         }
-        CImage image(f);
+        CImage image(f, input);
         image.ditherIt(input);
         getAnsw(input.outputName, image);
         return 0;
