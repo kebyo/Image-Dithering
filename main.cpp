@@ -13,6 +13,7 @@ void getAnsw(const char *fileName, CImage &output) {
     fprintf(new_f, "P%i\n%i %i\n%i\n", 5, output.width, output.height, output.max_val);
     unsigned char *buffer = new unsigned char[output.size];
     for (int i = 0; i < output.size; i++) {
+
         buffer[i] = (unsigned char) output.pix[i];
     }
     fwrite(buffer, sizeof(unsigned char), output.size, new_f);

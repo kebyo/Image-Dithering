@@ -1,10 +1,14 @@
 #include "CImage.h"
-#include <limits.h>
+
+typedef int i1;
 
 CImage::CImage(FILE *f, SInput config) {
     file = f;
     if (fscanf(f, "P%i%i%i%i\n", &this->version, &this->width, &this->height, &max_val) != 4) {
         throw CExpension("Wrong amount data in file", f);
+    }
+    if (version != 5) {
+        throw CExpension("Wrong version");
     }
     size = width * height;
     unsigned char *buffer = new unsigned char[size];
@@ -60,9 +64,9 @@ void CImage::ditherIt(SInput config) {
 
 void CImage::makeGradient(SInput config) {
     for (int i = 0; i < width; i++) {
+        double newColor = 255.0 * (double) i / (width - 1);
         for (int j = 0; j < height; j++) {
-            double newColor = 255.0 * (double) i / width;
-            pix[j * width + i] = (int) round(newColor);
+            pix[j * width + i] = newColor;
         }
     }
 }
@@ -93,7 +97,7 @@ double CImage::reverseGamma(double value, double gamma) {
 
 void CImage::WithoutDith(SInput config) {
     for (int i = 0; i < size; i++) {
-        pix[i] = findNearestPalleteCollor((int) pix[i]);
+        pix[i] = newPix((int) pix[i], config.bit);
     }
 }
 
@@ -110,8 +114,9 @@ void CImage::Ordered8x8(SInput config) {
 void CImage::Random(SInput config) {
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            int clr = pix[index(i, j)];
-            clr = clr + 255.0 * ((double) rand() / RAND_MAX - 0.5);
+            double rndm = (double)rand() / RAND_MAX;
+            i1
+            clr = clr + 255.0 * (double) (rndm - 0.5);
             pix[j * width + i] = findNearestPalleteCollor(clr);
         }
     }
