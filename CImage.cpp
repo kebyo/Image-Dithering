@@ -65,7 +65,7 @@ void CImage::makeGradient(SInput config) {
 
 double CImage::Gamma(double value, double gamma) {
     value /= 255.0;
-    if (gamma == 0) {
+    if (gamma == 0.0) {
         double a = 0.055;
         if (value <= 0.04045) {
             return 255.0 * value / 12.92;
@@ -77,14 +77,14 @@ double CImage::Gamma(double value, double gamma) {
 
 double CImage::reverseGamma(double value, double gamma) {
     value /= 255.0;
-    if (gamma == 0) {
+    if (gamma == 0.0) {
         double a = 0.055;
         if (value <= 0.0031308) {
             return 255.0 * value * 12.92;
         }
-        return 255 * (1.0 + a) * pow(value, (double) 1 / 2.4) - a;
+        return 255.0 * ((1.0 + a) * pow(value, (double) (1 / 2.4)) - a);
     }
-    return 255.0 * pow(value, (double) 1 / gamma);
+    return 255.0 * pow(value, pow(gamma, -1));
 }
 
 void CImage::WithoutDith(SInput config) {
