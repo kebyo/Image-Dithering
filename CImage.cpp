@@ -1,4 +1,5 @@
 #include "CImage.h"
+#include <limits.h>
 
 CImage::CImage(FILE *f, SInput config) {
     file = f;
@@ -12,9 +13,6 @@ CImage::CImage(FILE *f, SInput config) {
     for (int i = 0; i < size; i++) {
         pix[i] = (double) buffer[i];
     }
-    for (int i = 0; i < size; i++) {
-        pix[i] = Gamma(pix[i], config.gamma);
-    }
     for (int i = 0; i < 256; i++) {
         pallete[i] = newPix(i, config.bit);
     }
@@ -25,6 +23,9 @@ CImage::CImage(FILE *f, SInput config) {
 void CImage::ditherIt(SInput config) {
     if (config.gradient == '1') {
         makeGradient(config);
+    }
+    for (int i = 0; i < size; i++) {
+        pix[i] = Gamma(pix[i], config.gamma);
     }
     switch (config.dith) {
         case 0:
@@ -51,6 +52,9 @@ void CImage::ditherIt(SInput config) {
         case 7:
             Halftone4x4orthogonal(config);
             break;
+    }
+    for (int i = 0; i < size; i++) {
+        pix[i] = reverseGamma(pix[i], config.gamma);
     }
 }
 
