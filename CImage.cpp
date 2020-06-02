@@ -1,7 +1,5 @@
 #include "CImage.h"
 
-typedef int i1;
-
 CImage::CImage(FILE *f, SInput config) {
     file = f;
     if (fscanf(f, "P%i%i%i%i\n", &this->version, &this->width, &this->height, &max_val) != 4) {
@@ -115,7 +113,7 @@ void CImage::Random(SInput config) {
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
             double rndm = (double)rand() / RAND_MAX;
-            i1
+            int clr = pix[index(i, j)];
             clr = clr + 255.0 * (double) (rndm - 0.5);
             pix[j * width + i] = findNearestPalleteCollor(clr);
         }
